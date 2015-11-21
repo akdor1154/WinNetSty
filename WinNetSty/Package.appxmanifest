@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-  <Identity Name="b03bd104-f3d6-4f27-baf3-8852f87fa9f2" Publisher="CN=jarrad" Version="1.0.0.0" />
+  <Identity Name="17915JarradWhitaker.NetStylus" Publisher="CN=55457360-06A1-44AF-A9A2-C5B563EA1FE8" Version="0.1.0.0" />
   <mp:PhoneIdentity PhoneProductId="b03bd104-f3d6-4f27-baf3-8852f87fa9f2" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
-    <DisplayName>WinNetSty</DisplayName>
-    <PublisherDisplayName>jarrad</PublisherDisplayName>
+    <DisplayName>NetStylus</DisplayName>
+    <PublisherDisplayName>Jarrad Whitaker</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
   <Dependencies>
@@ -15,10 +15,15 @@
   </Resources>
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="WinNetSty.App">
-      <uap:VisualElements DisplayName="WinNetSty" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="WinNetSty" BackgroundColor="transparent">
-        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png">
+      <uap:VisualElements DisplayName="NetStylus" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="NetStylus lets you use your Windows tablet as a drawing tablet for another PC. At present, the other PC must be running Linux, with the free server component by rfc2822, available at http://github.com/rfc2822 ." BackgroundColor="blanchedAlmond">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" Square310x310Logo="Assets\Square310x310Logo.png" ShortName="NetStylus">
+          <uap:ShowNameOnTiles>
+            <uap:ShowOn Tile="square150x150Logo" />
+            <uap:ShowOn Tile="wide310x150Logo" />
+            <uap:ShowOn Tile="square310x310Logo" />
+          </uap:ShowNameOnTiles>
         </uap:DefaultTile>
-        <uap:SplashScreen Image="Assets\SplashScreen.png" />
+        <uap:SplashScreen Image="Assets\SplashScreen.png" BackgroundColor="blanchedAlmond" />
       </uap:VisualElements>
     </Application>
   </Applications>
