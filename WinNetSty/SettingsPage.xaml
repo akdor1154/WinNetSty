@@ -1,0 +1,67 @@
+﻿<UserControl
+    x:Class="WinNetSty.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:WinNetSty"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    
+    <UserControl.Resources>
+        <local:NullInt16Converter x:Key="IntConverter"/>
+    </UserControl.Resources>
+
+
+    <Grid>
+            <ScrollViewer >
+            <StackPanel Padding="20" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <StackPanel Style="{StaticResource SettingsFlyoutSectionStyle}">
+                    <TextBlock Text="Network" Style="{StaticResource TitleTextBlockStyle}"/>
+                    <TextBlock Margin="0,25,0,10" Style="{StaticResource BodyTextBlockStyle}" Text="IP or hostname of the computer you want to connect this tablet to:"/>
+                    <TextBox HorizontalAlignment="Stretch" Text="{x:Bind settings.RemoteHost, Mode=TwoWay}"/>
+                    <TextBlock Margin="0,25,0,10" Style="{StaticResource BodyTextBlockStyle}" Text="UDP port of the computer you want to connect this tablet to:"/>
+                    <TextBox HorizontalAlignment="Stretch" Text="{x:Bind settings.RemotePort, Mode=TwoWay, Converter={StaticResource IntConverter}}"/>
+                </StackPanel>
+
+                <StackPanel Style="{StaticResource SettingsFlyoutSectionStyle}">
+                    <TextBlock Text="Behaviour" Style="{StaticResource TitleTextBlockStyle}"></TextBlock>
+                    <TextBlock Margin="0,25,0,5" Text="Respond to input from:" Style="{StaticResource BodyTextBlockStyle}"></TextBlock>
+                    <Grid HorizontalAlignment="Stretch" MinWidth="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*"  />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Mouse" Grid.Row="0" Grid.Column="0"></TextBlock>
+                        <ToggleSwitch
+                            Grid.Row="1" Grid.Column="0" MinWidth="0"
+                            IsOn="{x:Bind settings.EnableMouse, Mode=TwoWay}"/>
+
+                        <TextBlock Text="Touch" Grid.Row="0" Grid.Column="1" />
+                        <ToggleSwitch
+                            Grid.Row="1" Grid.Column="1" MinWidth="0"
+                            IsOn="{x:Bind settings.EnableTouch, Mode=TwoWay}"/>
+
+                        <TextBlock Text="Pen" Grid.Row="0" Grid.Column="2" />
+                        <ToggleSwitch
+                            Grid.Row="1" Grid.Column="2" MinWidth="0"
+                            IsOn="{x:Bind settings.EnablePen, Mode=TwoWay}"/>
+                    </Grid>
+                </StackPanel>
+
+                <StackPanel Style="{StaticResource SettingsFlyoutSectionStyle}">
+                    <TextBlock Text="Appearance" Style="{StaticResource TitleTextBlockStyle}"/>
+                    <TextBlock Margin="0,25,0,10" Text="Ink Persistence" Style="{StaticResource BodyTextBlockStyle}" />
+                    <Slider Value="{x:Bind settings.InkPersistence, Mode=TwoWay}"></Slider>
+                </StackPanel>
+            </StackPanel>
+
+
+        </ScrollViewer>
+
+    </Grid>
+</UserControl>

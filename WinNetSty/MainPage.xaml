@@ -1,0 +1,88 @@
+﻿<Page
+    x:Name="mainPage"
+    x:Class="WinNetSty.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:WinNetSty"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+
+    <SplitView
+        x:Name="ShellSplitView"
+        OpenPaneLength="{x:Bind BindableWidth, Mode=OneWay, FallbackValue=200}"
+        PaneBackground="BlanchedAlmond"
+        PaneClosing="PaneClosing">
+        <SplitView.Pane>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Button
+                    Grid.Row="0"
+                    x:Name="CloseSettingsButton"
+                    FontFamily="Segoe MDL2 Assets"
+                    Content="&#xE140;"
+                    Width="48"
+                    Height="48"
+                    Background="Transparent"
+                    Foreground="Black"
+                    VerticalAlignment="Top"
+                    BorderThickness="0"
+                    Click="CloseSettingsButtonClicked">
+                    <Button.RenderTransform>
+                        <ScaleTransform ScaleX="-1" ScaleY="1" CenterX="24" CenterY="24"/>
+                    </Button.RenderTransform>
+
+                </Button>
+                <local:SettingsPage x:Name="SettingsPage" Grid.Row="1"/>
+            </Grid>
+        </SplitView.Pane>
+        <Grid>
+
+            <local:DrawPage />
+            <Button
+                x:Name="SettingsButton"
+                FontFamily="Segoe MDL2 Assets"
+                Content="&#xE713;"
+                Width="48"
+                Height="48"
+                Background="Transparent"
+                Foreground="Black"
+                VerticalAlignment="Top"
+                BorderThickness="0"
+                Click="SettingsButtonClicked" />
+        </Grid>
+
+            <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="AdaptiveStates" CurrentStateChanged="VisualStateChanged">
+                
+                <VisualState x:Name="DefaultState">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger x:Name="BigTrigger" MinWindowWidth="721" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="ShellSplitView.DisplayMode" Value="Overlay" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="MinimalState">
+
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+
+                    <VisualState.Setters>
+                        <Setter Target="ShellSplitView.DisplayMode" Value="Inline" />
+                    </VisualState.Setters>
+                </VisualState>
+
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+    </SplitView>
+
+
+
+
+</Page>
