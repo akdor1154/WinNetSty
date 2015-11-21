@@ -218,10 +218,7 @@ namespace WinNetSty {
 
             InkMove?.Invoke(this, new InkButtonEventArgs(point, this.canvas));
         }
-
-        private void StartDrawing() {
-
-        }
+        
         
     }
 }
