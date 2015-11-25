@@ -1,3 +1,5 @@
+# Licence
+
 This source code is licenced to you with the following conditions:
 - Copyleft: You may distribute it or any derivative work of it, but only if that distribution is also subject to this licence;
 - Source Code: If you distribute a derivative work (e.g. a compiled release), you must make source code to that distribution available to any recipients, and clearly advertize this availability to them;
@@ -5,4 +7,4 @@ This source code is licenced to you with the following conditions:
 
 If you would like an exception to the above licence, contact me.
 
-- Jarrad Whitaker - https://github.com/akdor1154
+-- Jarrad Whitaker - https://github.com/akdor1154
