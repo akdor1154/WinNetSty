@@ -44,11 +44,8 @@ namespace WinNetSty {
             }
         }
 
-        private void OnInkDown(DrawCanvas sender, InkButtonDownEventArgs e) {
-            networkController.SendInkDown(e);
-        }
-        private void OnInkUp(DrawCanvas sender, InkButtonUpEventArgs e) {
-            networkController.SendInkUp(e);
+        private void OnInkButton(DrawCanvas sender, InkButtonEventArgs e) {
+            networkController.SendInkButton(e);
         }
         private void OnInkMove(DrawCanvas sender, InkEventArgs e) {
             networkController.SendInkMove(e);

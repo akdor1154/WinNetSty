@@ -47,14 +47,10 @@ namespace WinNetSty {
             Button = 0x01
         }
 
-        private enum ButtonStatus : byte {
-            Up = 0x00,
-            Down = 0x01
-        }
         
         private class GfxTabletPacket {
             public readonly byte[] header = { (byte)'G', (byte)'f', (byte)'x', (byte)'T', (byte)'a', (byte)'b', (byte)'l', (byte)'e', (byte)'t' };
-            public readonly ushort version = 0x01;
+            public readonly ushort version = 0x02;
             public EventType type;
             public ushort x;
             public ushort y;
@@ -65,7 +61,7 @@ namespace WinNetSty {
                 this.x = (ushort) (args.Position.X * ushort.MaxValue);
                 this.y = (ushort) (args.Position.Y * ushort.MaxValue);
                 this.pressure = (args.Pressure.HasValue)
-                    ? (ushort) (args.Pressure.Value * ushort.MaxValue)
+                    ? (ushort) (args.Pressure.Value * short.MaxValue)
                     : (ushort) short.MaxValue;
             }
 
@@ -84,13 +80,13 @@ namespace WinNetSty {
         }
         
         private class GfxTabletButtonPacket : GfxTabletPacket {
-            public byte button;
+            public ButtonType button;
             public ButtonStatus status;
 
-            public GfxTabletButtonPacket(InkButtonEventArgs args, ButtonStatus status) : base(args) {
+            public GfxTabletButtonPacket(InkButtonEventArgs args) : base(args) {
                 this.type = EventType.Button;
-                this.button = (byte) args.Button;
-                this.status = status;
+                this.button = args.Button;
+                this.status = args.ButtonStatus;
             }
 
             public override byte[] ToBytes() {
@@ -99,7 +95,7 @@ namespace WinNetSty {
                 byte[] baseData = base.ToBytes();
                 Array.Copy(baseData, data, baseData.Length);
 
-                data[18] = this.button;
+                data[18] = (byte) this.button;
                 data[19] = (byte) this.status;
 
                 return data;
@@ -225,17 +221,12 @@ namespace WinNetSty {
             this.connectionStatus = ConnectionState.CONNECTED;
         }
 
-        public void SendInkDown(InkButtonDownEventArgs args) {
-            Debug.WriteLine("Sending button {0} down", args.Button);
-            GfxTabletButtonPacket packet = new GfxTabletButtonPacket(args, ButtonStatus.Down);
+        public void SendInkButton(InkButtonEventArgs args) {
+            Debug.WriteLine("Sending button {0} {1}", args.Button, args.ButtonStatus);
+            GfxTabletButtonPacket packet = new GfxTabletButtonPacket(args);
             SendPacket(packet);
         }
-
-        public void SendInkUp(InkButtonUpEventArgs args) {
-            Debug.WriteLine("Sending button {0} up", args.Button);
-            GfxTabletButtonPacket packet = new GfxTabletButtonPacket(args, ButtonStatus.Up);
-            SendPacket(packet);
-        }
+        
 
         public void SendInkMove(InkEventArgs args) {
             GfxTabletPacket packet = new GfxTabletPacket(args);

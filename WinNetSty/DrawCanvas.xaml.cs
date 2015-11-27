@@ -7,11 +7,30 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Input;
 using System.Numerics;
 using Windows.UI.Xaml;
+using System.Windows.Input;
 using System.Diagnostics;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
 
 namespace WinNetSty {
+
+    public enum ButtonStatus : byte {
+        Up = 0x00,
+        Down = 0x01
+    }
+
+    public enum ButtonType : sbyte {
+        InRange = -1,
+        InContact = 0,
+        Eraser = 1,
+        Button2 = 2
+    }
+
+    enum StylusRangeStatus: byte {
+        OutOfRange,
+        InRange,
+        FakingInRange
+    }
 
     public class InkEventArgs : EventArgs {
 
@@ -29,26 +48,15 @@ namespace WinNetSty {
     }
 
     public class InkButtonEventArgs : InkEventArgs {
-        public int Button { get; set; }
+        public ButtonType Button { get; set; }
+        public ButtonStatus ButtonStatus { get; set; }
 
-        public InkButtonEventArgs(PointerPoint point, Control container) : base(point, container) {
-            if (point.Properties.IsBarrelButtonPressed) {
-                this.Button = 2;
-            } else if (point.Properties.IsEraser) {
-                this.Button = 1;
-            } else {
-                this.Button = 0;
-            }
+        public InkButtonEventArgs(ButtonType button, ButtonStatus buttonStatus, PointerPoint point, Control container) : base(point, container) {
+            this.ButtonStatus = buttonStatus;
+            this.Button = button;
         }
     }
-
-    public class InkButtonDownEventArgs : InkButtonEventArgs {
-        public InkButtonDownEventArgs(PointerPoint point, Control container) : base(point, container) { }
-    }
-    public class InkButtonUpEventArgs : InkButtonEventArgs {
-        public InkButtonUpEventArgs(PointerPoint point, Control container) : base(point, container) { }
-    }
-
+    
     struct DrawnPoint {
 
         public long Time { get; set; }
@@ -87,17 +95,17 @@ namespace WinNetSty {
         public const float alphaToCull = 0.03f;
         public readonly float ageToCull = (long)-Math.Log(alphaToCull / (1+alphaToCull) ) / decayRate;
 
-        public delegate void InkDownEventHandler(DrawCanvas sender, InkButtonDownEventArgs e);
+        public delegate void InkButtonEventHandler(DrawCanvas sender, InkButtonEventArgs e);
         public delegate void InkMoveEventHandler(DrawCanvas sender, InkEventArgs e);
-        public delegate void InkUpEventHandler(DrawCanvas sender, InkButtonUpEventArgs e);
 
-        public event InkDownEventHandler InkDown;
+        public event InkButtonEventHandler InkButton;
         public event InkMoveEventHandler InkMove;
-        public event InkUpEventHandler InkUp;
 
         private Settings settings;
         private DispatcherTimer redrawTimer;
         bool drawing;
+        private ButtonType? currentButton;
+        private StylusRangeStatus stylusRangeStatus;
 
         public DrawCanvas() {
             this.InitializeComponent();
@@ -107,6 +115,8 @@ namespace WinNetSty {
             redrawTimer.Interval = new TimeSpan(0, 0, 0, 0, 1000/60);
             redrawTimer.Tick += RedrawScreen;
             drawing = false;
+            currentButton = null;
+            stylusRangeStatus = StylusRangeStatus.OutOfRange;
         }
 
         private void MarkCanvasDirty() {
@@ -178,6 +188,84 @@ namespace WinNetSty {
             drawing = false;
         }
 
+        private void debugPoint(PointerPoint point) {
+            Debug.WriteLine("update type: {0}, button: {1}, eraser: {2}, contact: {3}, pressure: {4}", point.Properties.PointerUpdateKind, point.Properties.IsBarrelButtonPressed, point.Properties.IsEraser, point.IsInContact, point.Properties.Pressure);
+
+
+        }
+
+        private void UnMangleStylusDown(PointerPoint point, CanvasControl canvas) {
+
+            ButtonType? extraButton = null;
+
+            if (point.PointerDevice.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Pen) {
+                if (point.Properties.IsEraser) {
+                    extraButton = ButtonType.Eraser;
+                } else if (point.Properties.IsBarrelButtonPressed) {
+                    extraButton = ButtonType.Button2;
+                }
+            } else if (point.PointerDevice.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Mouse) {
+                if (point.Properties.IsRightButtonPressed) {
+                    extraButton = ButtonType.Button2;
+                } else if (point.Properties.IsMiddleButtonPressed) {
+                    extraButton = ButtonType.Eraser;
+                }
+            }
+            this.currentButton = extraButton;
+
+            // on the PC we are drawing to, In Range events (BTN_TOOL_PEN) need to be received for Touch events (BTN_TOUCH) to be taken notice of.
+            if (stylusRangeStatus != StylusRangeStatus.InRange) {
+                stylusRangeStatus = StylusRangeStatus.FakingInRange;
+                InkButton.Invoke(this, new InkButtonEventArgs(ButtonType.InRange, ButtonStatus.Down, point, this.canvas));
+            }
+
+            if (extraButton.HasValue) {
+                InkButton?.Invoke(this, new InkButtonEventArgs(extraButton.Value, ButtonStatus.Down, point, this.canvas));
+            } else {
+                InkButton?.Invoke(this, new InkButtonEventArgs(ButtonType.InContact, ButtonStatus.Down, point, this.canvas));
+            }
+
+        }
+
+        private void UnMangleStylusUp(PointerPoint point, CanvasControl canvas) {
+            
+            if (this.currentButton.HasValue) {
+                InkButton?.Invoke(this, new InkButtonEventArgs(currentButton.Value, ButtonStatus.Up, point, this.canvas));
+                this.currentButton = null;
+            } else {
+                InkButton?.Invoke(this, new InkButtonEventArgs(ButtonType.InContact, ButtonStatus.Up, point, this.canvas));
+            }
+
+            if (stylusRangeStatus == StylusRangeStatus.FakingInRange) {
+                stylusRangeStatus = StylusRangeStatus.OutOfRange;
+                InkButton.Invoke(this, new InkButtonEventArgs(ButtonType.InRange, ButtonStatus.Up, point, this.canvas));
+            }
+
+        }
+
+        protected override void OnPointerEntered(PointerRoutedEventArgs e) {
+            Pointer pointer = e.Pointer;
+            if (!weCareAbout(pointer))
+                return;
+
+            PointerPoint point = e.GetCurrentPoint(this.canvas);
+            e.Handled = true;
+            
+            InkButton?.Invoke(this, new InkButtonEventArgs(ButtonType.InRange, ButtonStatus.Down, point, this.canvas));
+            stylusRangeStatus = StylusRangeStatus.InRange;
+        }
+
+        protected override void OnPointerExited(PointerRoutedEventArgs e) {
+            Pointer pointer = e.Pointer;
+            if (!weCareAbout(pointer))
+                return;
+
+            PointerPoint point = e.GetCurrentPoint(this.canvas);
+            e.Handled = true;
+            
+            InkButton?.Invoke(this, new InkButtonEventArgs(ButtonType.InRange, ButtonStatus.Up, point, this.canvas));
+            stylusRangeStatus = StylusRangeStatus.OutOfRange;
+        }
 
         protected override void OnPointerPressed(PointerRoutedEventArgs e) {
             Pointer pointer = e.Pointer;
@@ -190,7 +278,7 @@ namespace WinNetSty {
             points.Enqueue(new DrawnPoint(point));
             MarkCanvasDirty();
 
-            InkDown?.Invoke(this, new InkButtonDownEventArgs(point, this.canvas));
+            UnMangleStylusDown(point, this.canvas);
         }
 
         protected override void OnPointerReleased(PointerRoutedEventArgs e) {
@@ -204,7 +292,7 @@ namespace WinNetSty {
             points.Enqueue(new DrawnPoint(point, endStroke: true));
             MarkCanvasDirty();
 
-            InkUp?.Invoke(this, new InkButtonUpEventArgs(point, this.canvas));
+            UnMangleStylusUp(point, this.canvas);
         }
 
         protected override void OnPointerMoved(PointerRoutedEventArgs e) {
@@ -215,9 +303,10 @@ namespace WinNetSty {
             
             points.Enqueue(new DrawnPoint(point));
             MarkCanvasDirty();
-
-            InkMove?.Invoke(this, new InkButtonEventArgs(point, this.canvas));
+            
+            InkMove?.Invoke(this, new InkEventArgs(point, this.canvas));
         }
+        
         
         
     }

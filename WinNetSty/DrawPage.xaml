@@ -26,8 +26,7 @@
 
     <Grid>
         <local:DrawCanvas
-        InkDown="OnInkDown"
-        InkUp="OnInkUp"
+        InkButton="OnInkButton"
         InkMove="OnInkMove"/>
         <TextBlock x:Name="MessageTextBox" IsHitTestVisible="False" HorizontalAlignment="Right" VerticalAlignment="Bottom" />
     </Grid>
