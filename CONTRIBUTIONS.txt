@@ -1,0 +1,10 @@
+By contributing to this project, you grant me the right to distribute your contribution as follows:
+
+1) to use your contribution in the binary release of this software on the Windows Store, which I may make a profit from, and
+2) to make your contribution available under the NetStylus licence, which guarantees it will be available in source code form to the general public under a copyleft-style licence.
+
+In return, I declare that I will distribute your contribution in both ways as described above (i.e. I will always make sure your contribution is available in source code form to the general public under the NetStylus licence).
+
+---
+
+If you contribution is large and this project by some freakish universe fluke actually generates significant income, I may buy you a beer / send you money on paypal. However if you do make a contribution, you should do it on the assumption that this will not occur.
