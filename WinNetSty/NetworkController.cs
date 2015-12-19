@@ -38,6 +38,7 @@ namespace WinNetSty {
         }
     }
 
+
     class NetworkController {
         
         DatagramSocket socket;
